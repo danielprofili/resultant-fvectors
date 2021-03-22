@@ -33,12 +33,8 @@ for it in range(args.count):
     # check for degenerate case of 3 collinear points
     exps = []
     for i in range(len(args.config)):
-        # new_poly = [0] * num_per_poly
-        # new_poly = [tuple([0] * args.num_vars)] * args.num_terms
         new_poly = [tuple([0] * args.num_vars)] * args.config[i] 
-        # while all(e == 0 for e in new_poly): 
         while len(set(new_poly)) <= 1: # ensures no degenerate cases
-            # new_poly = [random.randint(args.drange[0], args.drange[1]) for i in range(num_per_poly)]
             # build new list pointwise
             for i in range(args.config[i]):
                 new_poly[i] = tuple([random.randint(args.drange[0], args.drange[1]) for j in range(args.num_vars)])
@@ -62,7 +58,6 @@ results = gfr.GfanRunner().multi_run(pool, inputs)
 dt = time.time() - t0
 
 # sort output by f_0
-# results = sorted(results, key=lambda x: x[1][0], reverse=False)
 unique_f_vecs = sorted(list(set([r[1] for r in results])), key=lambda x: x[0], reverse=False)
 
 # print the output

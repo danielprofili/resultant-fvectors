@@ -64,65 +64,24 @@ if __name__ == '__main__':
     # use cmd arg num iterations if specified, otherwise do all of them
     num_slots = fstr.count('%')
     num_iterations = args.count if args.count > 0 else (args.drange[1]-args.drange[0] + 1) ** num_slots
-    # print(num_iterations)
-    # input()
 
     # start timer
     t0 = time.time()
     count = 0
-    # todo: find a better way to do this without storing the huge list in memory
-    # todo: parallelize
     input_it = itertools.product(range(args.drange[0], args.drange[1] + 1), repeat=num_slots)
     inputs = []
 
     print('Preparing input')
-    # configs_raw = itertools.islice(input_it, args.start, args.start + num_iterations)
-    # configs = [];
-    # for exps_str in tqdm(configs_raw, total=num_iterations - args.start):
-    #     configs.append(list(literal_eval(fstr.replace('{', '').replace('}', '') % exps_str)))
-
+    # note: too large of chunksize deadlocks the pool for unknown reasons
     chunksize = int((num_iterations - args.start)/cpu_count() / 100)
-    # print(chunksize)
-    # input()
-    # chunksize = 1
     configs = itertools.islice(input_it, args.start, args.start + num_iterations)
     cfg_processor = ConfigurationValidator(fstr)
-    # proc_pool = mp.Pool()
+
     with mp.Pool() as proc_pool:
         for out in tqdm(proc_pool.imap_unordered(cfg_processor.process_config, configs, chunksize), total=num_iterations - args.start):
             if out is not None:
-                # inputs.append(fstr % out)
                 inputs.append(out)
-    # for exps_str in tqdm(itertools.islice(input_it, args.start, args.start + num_iterations), total=num_iterations - args.start):
-        # all_counter += 1
-        # exps = list(literal_eval(fstr.replace('{', '').replace('}', '') % exps_str)) # hack, but should work assuming nice input
-        # flag = False
 
-        # # try check for degenerate cases
-        # for i in range(len(exps)):
-        #     # first: check for repeated points
-        #     if len(set(exps[i])) < cfg[i]:
-        #         flag = True
-        #         break
-
-        #     # check for collinear points (removes all 3d cases I think?)
-        #     p0, p1, p2 = exps[i]
-        #     x1, y1 = p1[0] - p0[0], p1[1] - p0[1]
-        #     x2, y2 = p2[0] - p0[0], p2[1] - p0[0]
-        #     # integers so don't worry about tolerance
-        #     if abs(x1 * y2 - x2 * y1) == 0:
-        #         flag = True
-        #         break
-
-        #     # todo: check for parallel edges between triangles???
-
-        # if not flag:
-        #     inputs.append(fstr % exps_str)
-
-    # close old pool
-    # proc_pool.close()
-
-    # print('done preparing input')
     # create new pool
     if args.procs > 0:
         pool = mp.Pool(args.procs, initializer=gfr.initializer)
@@ -133,10 +92,7 @@ if __name__ == '__main__':
     results = gfr.multi_run(pool, inputs, print_output=False, chunks=1)
     dt = time.time() - t0
 
-    # sort output by f_0
-    # results = sorted(results, key=lambda x: x[1][0], reverse=False)
-
-    # find unique f-vectors, and sort by f0 (first entry)
+    # find unique f-vectors and sort by f0 (first entry - number of vertices)
     unique_f_vecs = sorted(list(set([r[1] for r in results])), key=lambda x: x[0], reverse=False)
 
     # print the output/write to file
