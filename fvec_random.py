@@ -3,7 +3,8 @@ import sys
 import argparse
 import random
 import time
-import gfan_runner as gfr
+import fvec_runner as fvr
+import fvec_util as util
 import multiprocessing as mp
 
 parser = argparse.ArgumentParser(description='Generate system of polynomials and calculate the resultant f-vector')
@@ -12,6 +13,7 @@ parser.add_argument('-v', '--num-vars', help='Number of variables', type=int, de
 parser.add_argument('-f', '--config', help='Configuration of system', type=int, nargs='+', default=[3, 3, 3])
 parser.add_argument('-c', '--count', help='Number of systems to generate', type=int, default=1)
 parser.add_argument('-p', '--procs', help='Max number of concurrent processes', type=int, default=-1)
+parser.add_argument('-o', '--output', help='Name of output file', type=str, default=None)
 
 args = parser.parse_args()
 
@@ -50,25 +52,14 @@ for it in range(args.count):
 # end for loop
 
 if args.procs > 0:
-    pool = mp.Pool(args.procs, initializer=gfr.initializer)
+    pool = mp.Pool(args.procs, initializer=fvr.initializer)
 else:
     pool = mp.Pool()
 
-results = gfr.GfanRunner().multi_run(pool, inputs)
+results = fvr.multi_run(pool, inputs)
 dt = time.time() - t0
 
-# sort output by f_0
-unique_f_vecs = sorted(list(set([r[1] for r in results])), key=lambda x: x[0], reverse=False)
-
-# print the output
-for vec, out in results:
-    print(vec)
-    print(out)
-    print('')
-
-print('Unique f-vectors: ')
-for fv in unique_f_vecs:
-    print(fv)
-
-print('Time: %f for %d results' % (dt, len(results)))
-print('Average time: %f per item' % (dt / len(results)))
+if args.output is None:
+    util.print_results(results, dt=dt)
+else:
+    util.print_results(results, filename=args.output, dt=dt)
