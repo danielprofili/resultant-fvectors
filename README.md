@@ -13,6 +13,6 @@ The main entry points are `fvec_random.py` and `fvec_enumerate.py`; their comman
 ## Background
 See https://danielprofili.github.io/research.html for some background theory.
 
-## Credits
+## References
 
-The tropical resultant computations are done using [Gfan](https://users-math.au.dk/jensen/software/gfan/gfan.html) by Anders Jensen
+The tropical resultant computations are done using [Gfan](https://users-math.au.dk/jensen/software/gfan/gfan.html) by Anders Jensen, using theory developed by Jensen and Josephine Yu in [Computing tropical resultants (2011)](https://arxiv.org/abs/1109.2368)
