@@ -28,7 +28,7 @@ def run(inp_str):
         #     print('%s\n%s\n' % (inp_str, out))
     except IndexError:
         print('%s not a hypersurface' % inp_str)
-        # out = None
+        out = 'invalid'
 
     return (inp_str, out)
 
